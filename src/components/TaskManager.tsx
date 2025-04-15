@@ -21,7 +21,7 @@ import {
 interface Task {
   id: number;
   name: string;
-  priority: number;
+  priority: "low" | "medium" | "high";
   completed: boolean;
   createdAt: Date;
   dueDate?: Date;
@@ -33,7 +33,7 @@ interface Task {
 const TaskManager = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [taskName, setTaskName] = useState("");
-  const [priority, setPriority] = useState(1);
+  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [isAdding, setIsAdding] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,7 +86,10 @@ const TaskManager = () => {
       setCategories(prev => [...prev, category]);
     }
     
-    const updated = [...tasks, newTask].sort((a, b) => a.priority - b.priority);
+    const updated = [...tasks, newTask].sort((a, b) => {
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    });
     setTasks(updated);
     resetForm();
     setIsAdding(false);
@@ -94,7 +97,7 @@ const TaskManager = () => {
 
   const resetForm = () => {
     setTaskName("");
-    setPriority(1);
+    setPriority("medium");
     setDescription("");
     setDueDate("");
     setCategory("");
@@ -141,7 +144,10 @@ const TaskManager = () => {
               estimatedTime: estimatedTime ? parseInt(estimatedTime) : undefined
             }
           : task
-      ).sort((a, b) => a.priority - b.priority)
+      ).sort((a, b) => {
+        const priorityOrder = { high: 3, medium: 2, low: 1 };
+        return priorityOrder[b.priority] - priorityOrder[a.priority];
+      })
     );
     
     if (category && !categories.includes(category)) {
@@ -200,6 +206,19 @@ const TaskManager = () => {
       transition: {
         duration: 0.2
       }
+    }
+  };
+
+  const getPriorityColor = (priority: "low" | "medium" | "high") => {
+    switch (priority) {
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -268,13 +287,15 @@ const TaskManager = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                  <input
-                    type="number"
-                    min="1"
+                  <select
                     value={priority}
-                    onChange={e => setPriority(parseInt(e.target.value))}
+                    onChange={e => setPriority(e.target.value as "low" | "medium" | "high")}
                     className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  />
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
@@ -468,7 +489,9 @@ const TaskManager = () => {
                       {task.name}
                     </span>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>Priority: {task.priority}</span>
+                      <span className={getPriorityColor(task.priority)}>
+                        {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+                      </span>
                       {task.category && (
                         <span className="flex items-center gap-1">
                           <Tag className="w-4 h-4" />
