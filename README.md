@@ -1,6 +1,6 @@
 # Task Manager
 
-A modern, interactive task management application built with Next.js, TypeScript, and Tailwind CSS.
+A modern, interactive task management application built with Next.js, TypeScript, CSS.
 
 ## Features
 
@@ -17,7 +17,7 @@ A modern, interactive task management application built with Next.js, TypeScript
 
 - Next.js 14
 - TypeScript
-- Tailwind CSS
+- CSS
 - Framer Motion
 - Lucide Icons
 
